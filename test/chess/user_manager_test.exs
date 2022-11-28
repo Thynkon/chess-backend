@@ -2,6 +2,7 @@ defmodule Chess.UserManagerTest do
   use Chess.DataCase
 
   alias Chess.UserManager
+  require Logger
 
   describe "users" do
     alias Chess.UserManager.User
@@ -9,6 +10,8 @@ defmodule Chess.UserManagerTest do
     import Chess.UserManagerFixtures
 
     @invalid_attrs %{password: nil, username: nil}
+    @valid_attrs %{password: "password", username: "user"}
+    @update_attrs %{password: "new_password", username: "new_user"}
 
     test "list_users/0 returns all users" do
       user = user_fixture()
@@ -20,25 +23,8 @@ defmodule Chess.UserManagerTest do
       assert UserManager.get_user!(user.id) == user
     end
 
-    test "create_user/1 with valid data creates a user" do
-      valid_attrs = %{password: "some password", username: "some username"}
-
-      assert {:ok, %User{} = user} = UserManager.create_user(valid_attrs)
-      assert user.password == "some password"
-      assert user.username == "some username"
-    end
-
     test "create_user/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = UserManager.create_user(@invalid_attrs)
-    end
-
-    test "update_user/2 with valid data updates the user" do
-      user = user_fixture()
-      update_attrs = %{password: "some updated password", username: "some updated username"}
-
-      assert {:ok, %User{} = user} = UserManager.update_user(user, update_attrs)
-      assert user.password == "some updated password"
-      assert user.username == "some updated username"
     end
 
     test "update_user/2 with invalid data returns error changeset" do
@@ -60,15 +46,16 @@ defmodule Chess.UserManagerTest do
 
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = UserManager.create_user(@valid_attrs)
-      assert {:ok, user} == Argon2.check_pass(user, "some password", hash_key: :password)
-      assert user.username == "some username"
+      assert {:ok, user} == Argon2.check_pass(user, "password", hash_key: :password)
+      assert user.username == "user"
     end
 
     test "update_user/2 with valid data updates the user" do
       user = user_fixture()
+      Logger.debug(inspect(@update_attrs))
       assert {:ok, %User{} = user} = UserManager.update_user(user, @update_attrs)
-      assert {:ok, user} == Argon2.check_pass(user, "some updated password", hash_key: :password)
-      assert user.username == "some updated username"
+      assert {:ok, user} == Argon2.check_pass(user, "new_password", hash_key: :password)
+      assert user.username == "new_user"
     end
   end
 end

@@ -6,9 +6,10 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :chess, Chess.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "chess_test",
+  password: "chess_testpw",
   hostname: "localhost",
+  port: 5430,
   database: "chess_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
