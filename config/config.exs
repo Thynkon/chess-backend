@@ -38,10 +38,14 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :chess, Chess.UserManager.Guardian,
+config :chess, Chess.Guardian,
   issuer: "chess",
   # put the result of the mix command above here
   secret_key: "EfpJ0mAOVv0/v9YqrZ3aEloZLfeH45G5B5OMaHrlLUzMKQJ2UJkc2AKqHer0FtCH"
+
+config :chess, Chess.Guardian.AuthPipeline,
+  module: Chess.Guardian,
+  error_handler: Chess.AuthErrorHandler
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

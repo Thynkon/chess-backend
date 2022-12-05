@@ -2,6 +2,7 @@ defmodule ChessWeb.Router do
   use ChessWeb, :router
   # <-- Add this line
   use Plug.ErrorHandler
+  alias Chess.Guardian
 
   # and implement the callback handle_errors/2
   defp handle_errors(conn, %{reason: %Phoenix.Router.NoRouteError{message: message}}) do
@@ -16,18 +17,22 @@ defmodule ChessWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :jwt_authenticated do
+    plug Guardian.AuthPipeline
+  end
+
   scope "/api", ChessWeb do
     pipe_through :api
   end
 
-  pipeline :auth do
-    plug Chess.UserManager.Pipeline
-  end
+  # pipeline :auth do
+  #   plug Chess.UserManager.Pipeline
+  # end
 
   # We use ensure_auth to fail if there is no one logged in
-  pipeline :ensure_auth do
-    plug Guardian.Plug.EnsureAuthenticated
-  end
+  # pipeline :ensure_auth do
+  #   plug Guardian.Plug.EnsureAuthenticated
+  # end
 
   # Enables LiveDashboard only for development
   #
@@ -60,9 +65,15 @@ defmodule ChessWeb.Router do
 
   # Maybe logged in routes
   scope "/", ChessWeb do
-    pipe_through [:api, :auth]
+    pipe_through [:api]
 
     post "/login", SessionController, :login
+    post "/register", UserController, :store
+  end
+
+  scope "/", ChessWeb do
+    pipe_through [:api, :jwt_authenticated]
     get "/logout", SessionController, :logout
+    get "/show", SessionController, :show
   end
 end

@@ -1,20 +1,26 @@
 defmodule ChessWeb.SessionController do
   use ChessWeb, :controller
+  require Logger
 
-  alias Chess.{UserManager, UserManager.Guardian}
+  alias Chess.UserManager
   alias ChessWeb.SessionFallbackController
+  alias Chess.Guardian
 
   action_fallback SessionFallbackController
 
   def login(conn, %{"username" => username, "password" => password}) do
     with {:ok, user} <- UserManager.authenticate_user(username, password) do
+      {:ok, token, _claims} = Chess.Guardian.encode_and_sign(user)
+
       conn
-      |> json(%{msg: "User authenticated"})
+      |> json(%{token: token})
     end
   end
 
   def logout(conn, _) do
-    conn
-    |> Guardian.Plug.sign_out()
+    jwt = Guardian.Plug.current_token(conn)
+    Logger.debug("CURRENT JWT ==> #{inspect(jwt)}")
+    Guardian.revoke(jwt)
+    conn |> json(%{old_token: jwt})
   end
 end

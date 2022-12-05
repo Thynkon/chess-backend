@@ -23,4 +23,8 @@ defmodule ChessWeb.SessionFallbackController do
     |> put_view(ErrorView)
     |> render(:"403", reason: "Forbidden access")
   end
+
+  def call(conn, params) do
+    Logger.debug(inspect(params))
+  end
 end

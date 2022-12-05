@@ -1,4 +1,4 @@
-defmodule ChessWeb.ErrorView do
+defmodule ChessWeb.EctoView do
   use ChessWeb, :view
   require Logger
 
@@ -7,25 +7,16 @@ defmodule ChessWeb.ErrorView do
   # def render("500.json", _assigns) do
   #   %{errors: %{detail: "Internal Server Error"}}
   # end
-
-  def render("401.json", %{reason: reason}) do
-    %{error: %{code: 401, message: reason}}
+  def translate_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, &translate_error/1)
   end
 
-  def render("403.json", _assigns) do
-    %{error: %{code: 403, message: "Forbidden"}}
-  end
+  def render("changeset.json", %{changeset: %Ecto.Changeset{} = changeset, status: status}) do
+    Logger.debug(inspect(changeset))
 
-  def render("404.json", _assigns) do
-    %{error: %{code: 404, message: "Page not found"}}
-  end
-
-  def render("422.json", _assigns) do
-    %{error: %{code: 422, message: "Unprocessable entity"}}
-  end
-
-  def render("500.json", _assigns) do
-    %{error: %{code: 500, message: "Internal Server Error"}}
+    %{
+      error: %{code: status, message: "Something went wrong", errors: translate_errors(changeset)}
+    }
   end
 
   # # By default, Phoenix returns the status message from

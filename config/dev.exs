@@ -27,6 +27,17 @@ config :chess, ChessWeb.Endpoint,
   secret_key_base: "NmAS8+1f1YMkpzMZGh6akhmNh7J0DgaHg/uBx3eKySNscej/TAqbIu0IuMwvit0Y",
   watchers: []
 
+# Watch static and templates for browser reloading.
+config :chess, ChessWeb.Endpoint,
+  live_reload: [
+    patterns: [
+      ~r"priv/gettext/.*(po)$",
+      ~r"lib/chess/.*(ex)$",
+      ~r"lib/chess/.*/.*(ex)$",
+      ~r"lib/chess_web/controllers/.*(ex)$"
+    ]
+  ]
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

@@ -35,6 +35,7 @@ defmodule Chess.MixProject do
     [
       {:phoenix, "~> 1.6.15"},
       {:phoenix_ecto, "~> 4.4"},
+      {:phoenix_live_reload, "~> 1.3"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_live_dashboard, "~> 0.6"},
