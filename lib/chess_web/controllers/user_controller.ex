@@ -9,7 +9,7 @@ defmodule ChessWeb.UserController do
     with {:ok, user} <- UserManager.create_user(%{username: username, password: password}) do
       # asdf
       conn
-      |> json(%{msg: "User created 134"})
+      |> json(%{msg: "User created"})
     end
   end
 end

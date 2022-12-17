@@ -47,7 +47,8 @@ defmodule Chess.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:guardian, "~> 2.0"},
       {:argon2_elixir, "~> 3.0"},
-      {:comeonin, "~> 5.3"}
+      {:comeonin, "~> 5.3"},
+      {:cors_plug, "~> 3.0"}
     ]
   end
 

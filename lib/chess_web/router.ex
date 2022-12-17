@@ -19,6 +19,7 @@ defmodule ChessWeb.Router do
 
   pipeline :jwt_authenticated do
     plug Guardian.AuthPipeline
+    plug Chess.CurrentUser
   end
 
   scope "/api", ChessWeb do
@@ -73,6 +74,7 @@ defmodule ChessWeb.Router do
 
   scope "/", ChessWeb do
     pipe_through [:api, :jwt_authenticated]
+    post "/games", GameController, :store
     get "/logout", SessionController, :logout
     get "/show", SessionController, :show
   end

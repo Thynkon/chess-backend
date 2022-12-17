@@ -10,6 +10,8 @@ defmodule Chess.UserManager.User do
     field :username, :string
 
     timestamps()
+
+    has_many :games, Chess.Games.Game
   end
 
   @doc false
