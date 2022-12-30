@@ -75,6 +75,9 @@ defmodule ChessWeb.Router do
   scope "/", ChessWeb do
     pipe_through [:api, :jwt_authenticated]
     post "/games", GameController, :store
+
+    resources "/variants", VariantController, only: [:index]
+
     get "/logout", SessionController, :logout
     get "/show", SessionController, :show
   end

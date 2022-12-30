@@ -53,6 +53,12 @@ defmodule Chess.Games do
   """
   def create_game(attrs \\ %{}) do
     Logger.debug("Attrs ==> #{inspect(attrs)}")
+    status = Chess.Statuses.get_status_by_slug(:scheduled)
+
+    attrs =
+      if status !== nil do
+        attrs |> Map.put(:status_id, status.id)
+      end
 
     %Game{}
     |> Game.changeset(attrs)

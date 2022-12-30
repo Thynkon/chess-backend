@@ -5,29 +5,19 @@ defmodule ChessWeb.GameController do
 
   action_fallback GameFallbackController
 
-  def store(conn, %{
-        "level" => level,
-        "variant" => variant,
-        "duration" => duration
-      }) do
-    Logger.debug(inspect(conn.assigns))
-    # Logger.debug(Guardian.Plug.current_resource(conn))
-    # {:ok, claims} = Chess.Tokens.decode_and_verify(token)
-    with {:ok, _game} <-
+  def store(conn, %{"variant" => variant, "type" => type, "level" => level}) do
+    variant = Chess.Variants.get_variant_by_name(variant)
+    game_type = Chess.GameTypes.get_game_type_by_slug(String.to_atom(type))
+    fields = %{level: level}
+
+    with {:ok, game} <-
            Chess.Games.create_game(%{
              started_at: DateTime.utc_now(),
-             level: level,
-             variant: variant,
-             duration: duration,
-             user_id: conn.assigns.current_user.id
+             variant_id: variant.id,
+             game_type_id: game_type.id,
+             fields: fields
            }) do
-      conn |> json(%{msg: "Game created!"})
+      render(conn, "store.json", game: game)
     end
-
-    # with {:ok, user} <- UserManager.create_user(%{username: username, password: password}) do
-    #   # asdf
-    #   conn
-    #   |> json(%{msg: "User created"})
-    # end
   end
 end

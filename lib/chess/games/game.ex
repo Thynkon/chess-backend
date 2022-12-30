@@ -6,14 +6,15 @@ defmodule Chess.Games.Game do
   @foreign_key_type :binary_id
   @timestamps_opts inserted_at: :created_at
   schema "games" do
-    field :level, :integer
-    field :duration, :integer
-    field :variant, Ecto.Enum, values: [:standard, :crazyhouse]
     field :finished_at, :utc_datetime
     field :started_at, :utc_datetime
+    field :fields, :map
 
     timestamps()
     belongs_to :user, Chess.UserManager.User
+    belongs_to :status, Chess.Statuses.Status
+    belongs_to :variant, Chess.Variants.Variant
+    belongs_to :game_type, Chess.GameTypes.GameType
   end
 
   @doc false
@@ -23,12 +24,12 @@ defmodule Chess.Games.Game do
       :created_at,
       :started_at,
       :finished_at,
-      :level,
-      :variant,
-      :user_id,
-      :duration
+      :status_id,
+      :variant_id,
+      :game_type_id,
+      :fields
     ])
-    |> validate_required([:level, :duration, :variant])
+    |> validate_required([:variant_id, :status_id, :game_type_id, :fields])
   end
 
   def finish_changeset(game, attrs) do

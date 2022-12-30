@@ -43,4 +43,8 @@ defmodule ChessWeb.GameFallbackController do
     |> put_view(EctoView)
     |> render(:changeset, changeset: changeset, status: Status.code(:unprocessable_entity))
   end
+
+  def call(conn, params) do
+    Logger.debug("Fallback controller ==> #{inspect(params)}")
+  end
 end
