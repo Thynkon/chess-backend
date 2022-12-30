@@ -15,6 +15,7 @@ defmodule Chess.Games.Game do
     belongs_to :status, Chess.Statuses.Status
     belongs_to :variant, Chess.Variants.Variant
     belongs_to :game_type, Chess.GameTypes.GameType
+    has_many :game_participations, Chess.GameParticipations.GameParticipation
   end
 
   @doc false

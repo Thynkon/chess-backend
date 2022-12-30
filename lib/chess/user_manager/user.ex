@@ -12,6 +12,7 @@ defmodule Chess.UserManager.User do
     timestamps()
 
     has_many :games, Chess.Games.Game
+    has_many :game_participations, Chess.GameParticipations.GameParticipation
   end
 
   @doc false

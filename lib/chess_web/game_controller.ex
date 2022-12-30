@@ -17,7 +17,9 @@ defmodule ChessWeb.GameController do
              game_type_id: game_type.id,
              fields: fields
            }) do
-      render(conn, "store.json", game: game)
+      conn
+      |> put_status(:created)
+      |> render("store.json", game: game)
     end
   end
 end

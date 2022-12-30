@@ -16,8 +16,6 @@ defmodule ChessWeb.GameView do
       variant_id: game.variant_id
     }
 
-    Logger.debug("Rendering TEMPLATE ==> #{inspect(template)}")
-
     template
   end
 end
