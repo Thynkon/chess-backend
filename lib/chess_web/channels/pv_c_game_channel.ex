@@ -61,17 +61,32 @@ defmodule ChessWeb.PvCGameChannel do
 
     # Play move and fetch UCI response
     # {:ok, :continue, "c7c5"} = :binbo.uci_play(pid, %{}, "#{from}#{to}")
-    {:ok, :continue, <<_from::16, to::binary>> = _uci_move} =
-      :binbo.uci_play(pid, %{}, "#{from}#{to}")
+    case :binbo.uci_play(pid, %{}, "#{from}#{to}") do
+      {:ok, :continue, <<_from::16, to::binary>> = _uci_move} ->
+        {:ok, fen} = :binbo.get_fen(pid)
+        {:ok, legal_moves} = fetch_legal_moves(pid)
 
-    {:ok, fen} = :binbo.get_fen(pid)
-    {:ok, legal_moves} = fetch_legal_moves(pid)
+        broadcast!(socket, "play_game", %{
+          status: "continue",
+          legal_moves: legal_moves,
+          fen: fen,
+          to: to
+        })
 
-    broadcast!(socket, "play_game", %{
-      legal_moves: legal_moves,
-      fen: fen,
-      to: to
-    })
+      {:ok, {:checkmate, winner}, _} ->
+        a = Atom.to_string(winner)
+        # [["black_wins", "black"]]
+        matches = Regex.scan(~r/^([a-zA-Z]*)_wins$/, Atom.to_string(winner))
+        Logger.error("Winner ==> #{a}, Got matches ==> #{inspect(matches)}")
+        winner = matches |> Enum.at(0) |> Enum.at(1)
+
+        broadcast!(socket, "play_game", %{
+          status: "checkmate",
+          winner: winner
+        })
+
+        # {:error, {{:game_over, {:checkmate, :black_wins}}, "g2g3"}}
+    end
 
     {:noreply, socket}
   end
