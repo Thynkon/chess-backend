@@ -70,7 +70,8 @@ defmodule ChessWeb.PvCGameChannel do
           status: "continue",
           legal_moves: legal_moves,
           fen: fen,
-          to: to
+          uciMove: to,
+          playerMove: from
         })
 
       {:ok, {:checkmate, winner}, _} ->
