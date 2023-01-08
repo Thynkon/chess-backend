@@ -37,6 +37,15 @@ defmodule Chess.GameParticipations do
   """
   def get_game_participation!(id), do: Repo.get!(GameParticipation, id)
 
+  def get_game_participation_by_game(game_id) do
+    query =
+      from gp in GameParticipation,
+        where: gp.game_id == ^game_id,
+        select: gp
+
+    Repo.one(query)
+  end
+
   @doc """
   Creates a game_participation.
 

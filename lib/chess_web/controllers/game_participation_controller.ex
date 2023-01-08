@@ -15,7 +15,9 @@ defmodule ChessWeb.GameParticipationController do
 
   def create(conn, %{"game_id" => _game_id} = game_participation_params) do
     user = conn.assigns.current_user
-    side = Enum.random([:white, :black])
+    # side = Enum.random([:white, :black])
+    # This is a temporary 'fix'.
+    side = :white
     game_participation_params = game_participation_params |> Map.put("user_id", user.id)
     game_participation_params = game_participation_params |> Map.put("side", side)
 
