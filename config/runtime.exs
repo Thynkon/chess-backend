@@ -20,6 +20,16 @@ if System.get_env("PHX_SERVER") do
   config :chess, ChessWeb.Endpoint, server: true
 end
 
+config :chess, Chess.Repo,
+  username: System.get_env("DB_USER") || "chess",
+  password: System.get_env("DB_PASSWORD") || "chesspw",
+  hostname: System.get_env("DB_HOST") || "localhost",
+  database: System.get_env("DB_NAME") || "chess_dev",
+  port: System.get_env("DB_PORT") || 5430,
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
