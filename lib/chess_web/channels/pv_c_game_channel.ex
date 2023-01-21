@@ -102,6 +102,7 @@ defmodule ChessWeb.PvCGameChannel do
     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     # start application
     :binbo.start()
+    engine_path = {'localhost', 9010, 5000}
 
     # start server
     {:ok, pid} = :binbo.new_server()
@@ -109,8 +110,8 @@ defmodule ChessWeb.PvCGameChannel do
     # Connecting to UCI
     {:ok, :continue} =
       :binbo.new_uci_game(pid, %{
-        engine_path: "/usr/local/bin/stockfish",
-        fen: fen
+        engine_path: engine_path,
+        fen: fen,
       })
 
     # Show stockfish messages
