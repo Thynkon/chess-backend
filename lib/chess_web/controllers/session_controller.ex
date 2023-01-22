@@ -13,7 +13,7 @@ defmodule ChessWeb.SessionController do
       {:ok, token, _claims} = Chess.Guardian.encode_and_sign(user)
 
       conn
-      |> json(%{token: token})
+      |> json(%{token: token, user: user})
     end
   end
 
