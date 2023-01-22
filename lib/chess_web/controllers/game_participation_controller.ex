@@ -6,7 +6,7 @@ defmodule ChessWeb.GameParticipationController do
 
   require Logger
 
-  action_fallback ChessWeb.FallbackController
+  action_fallback(ChessWeb.FallbackController)
 
   def index(conn, _params) do
     game_participation = GameParticipations.list_game_participation()

@@ -36,6 +36,24 @@ defmodule ChessWeb.PvCGameChannel do
     game = Chess.Games.get_game!(game_id)
     game_participation = Chess.GameParticipations.get_game_participation_by_game(game.id)
 
+    {:ok, legal_moves} = fetch_legal_moves(pid)
+    {:ok, fen} = :binbo.get_fen(pid)
+
+    broadcast!(socket, "init_game", %{
+      legal_moves: legal_moves,
+      orientation: game_participation.side,
+      fen: fen
+    })
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_in("uci_move", %{"game_id" => game_id}, socket) do
+    pid = socket.assigns.pid
+    game = Chess.Games.get_game!(game_id)
+    game_participation = Chess.GameParticipations.get_game_participation_by_game(game.id)
+
     # If user is not white, let the UCI make the first move
     if game_participation.side !== :white do
       Logger.debug("Letting UCI make the first move!")
@@ -45,9 +63,8 @@ defmodule ChessWeb.PvCGameChannel do
     {:ok, legal_moves} = fetch_legal_moves(pid)
     {:ok, fen} = :binbo.get_fen(pid)
 
-    broadcast!(socket, "init_game", %{
+    broadcast!(socket, "uci_move", %{
       legal_moves: legal_moves,
-      orientation: game_participation.side,
       fen: fen
     })
 
@@ -85,8 +102,6 @@ defmodule ChessWeb.PvCGameChannel do
           status: "checkmate",
           winner: winner
         })
-
-        # {:error, {{:game_over, {:checkmate, :black_wins}}, "g2g3"}}
     end
 
     {:noreply, socket}
@@ -111,7 +126,7 @@ defmodule ChessWeb.PvCGameChannel do
     {:ok, :continue} =
       :binbo.new_uci_game(pid, %{
         engine_path: engine_path,
-        fen: fen,
+        fen: fen
       })
 
     # Show stockfish messages
