@@ -1,6 +1,7 @@
 defmodule ChessWeb.PvCGameChannel do
   require Logger
   use ChessWeb, :channel
+  alias Chess.Moves
 
   @impl true
   def join("pvc_game:lobby", payload, socket) do
@@ -34,6 +35,8 @@ defmodule ChessWeb.PvCGameChannel do
   def handle_in("init_game", %{"game_id" => game_id}, socket) do
     pid = socket.assigns.pid
     game = Chess.Games.get_game!(game_id)
+    socket = socket |> assign(:game_id, game_id)
+
     game_participation = Chess.GameParticipations.get_game_participation_by_game(game.id)
 
     {:ok, legal_moves} = fetch_legal_moves(pid)
@@ -63,6 +66,11 @@ defmodule ChessWeb.PvCGameChannel do
     {:ok, legal_moves} = fetch_legal_moves(pid)
     {:ok, fen} = :binbo.get_fen(pid)
 
+    # If UCI made the first move, log it
+    if game_participation.side !== :white do
+      {:ok, move} = Moves.create_move(%{game_id: game_id, fen: fen})
+    end
+
     broadcast!(socket, "uci_move", %{
       legal_moves: legal_moves,
       fen: fen
@@ -73,8 +81,9 @@ defmodule ChessWeb.PvCGameChannel do
 
   @impl true
   def handle_in("play_game", %{"from" => from, "to" => to}, socket) do
-    Logger.error("Got message from play_game, from => #{from}, to => #{to}")
+    Logger.debug("Got message from play_game, from => #{from}, to => #{to}")
     pid = socket.assigns.pid
+    game_id = socket.assigns.game_id
 
     # Play move and fetch UCI response
     # {:ok, :continue, "c7c5"} = :binbo.uci_play(pid, %{}, "#{from}#{to}")
@@ -82,6 +91,8 @@ defmodule ChessWeb.PvCGameChannel do
       {:ok, :continue, <<_from::16, to::binary>> = _uci_move} ->
         {:ok, fen} = :binbo.get_fen(pid)
         {:ok, legal_moves} = fetch_legal_moves(pid)
+
+        {:ok, move} = Moves.create_move(%{game_id: game_id, fen: fen})
 
         broadcast!(socket, "play_game", %{
           status: "continue",
@@ -95,7 +106,7 @@ defmodule ChessWeb.PvCGameChannel do
         a = Atom.to_string(winner)
         # [["black_wins", "black"]]
         matches = Regex.scan(~r/^([a-zA-Z]*)_wins$/, Atom.to_string(winner))
-        Logger.error("Winner ==> #{a}, Got matches ==> #{inspect(matches)}")
+        Logger.debug("Winner ==> #{a}, Got matches ==> #{inspect(matches)}")
         winner = matches |> Enum.at(0) |> Enum.at(1)
 
         broadcast!(socket, "play_game", %{

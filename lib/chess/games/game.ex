@@ -6,16 +6,17 @@ defmodule Chess.Games.Game do
   @foreign_key_type :binary_id
   @timestamps_opts inserted_at: :created_at
   schema "games" do
-    field :finished_at, :utc_datetime
-    field :started_at, :utc_datetime
-    field :fields, :map
+    field(:finished_at, :utc_datetime)
+    field(:started_at, :utc_datetime)
+    field(:fields, :map)
 
     timestamps()
-    belongs_to :user, Chess.UserManager.User
-    belongs_to :status, Chess.Statuses.Status
-    belongs_to :variant, Chess.Variants.Variant
-    belongs_to :game_type, Chess.GameTypes.GameType
-    has_many :game_participations, Chess.GameParticipations.GameParticipation
+    belongs_to(:user, Chess.UserManager.User)
+    belongs_to(:status, Chess.Statuses.Status)
+    belongs_to(:variant, Chess.Variants.Variant)
+    belongs_to(:game_type, Chess.GameTypes.GameType)
+    has_many(:game_participations, Chess.GameParticipations.GameParticipation)
+    has_many(:moves, Chess.Moves.Move)
   end
 
   @doc false
