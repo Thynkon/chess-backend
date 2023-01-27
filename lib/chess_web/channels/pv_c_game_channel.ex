@@ -117,7 +117,11 @@ defmodule ChessWeb.PvCGameChannel do
     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     # start application
     :binbo.start()
-    engine_path = {'localhost', 9010, 5000}
+    host = Application.fetch_env!(:chess, :stockfish_host)
+    port = Application.fetch_env!(:chess, :stockfish_port)
+    timeout = Application.fetch_env!(:chess, :stockfish_timeout)
+
+    engine_path = {host, port, timeout}
 
     # start server
     {:ok, pid} = :binbo.new_server()

@@ -2,14 +2,40 @@
 version: '3.1'
 
 services:
-  stockfish:
-    image: stockfish
-    restart: always
+  app:
+    image: exchess
     build: .
-    container_name: stockfish
+    container_name: exchess
     networks:
       exchess:
         ipv4_address: 172.60.0.2
+    environment:
+      DB_USER: "<CHANGE_ME>"
+      DB_PASSWORD: "<CHANGE_ME>"
+      DB_HOST: "172.60.0.4"
+      DB_NAME: "chess_dev"
+      DB_PORT: 5432
+      STOCKFISH_HOST: "172.60.0.3"
+      STOCKFISH_PORT: 9010
+    ports:
+      - "4000:4000"
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    command:
+      - "./entrypoint.sh"
+
+  stockfish:
+    image: stockfish
+    build: ./stockfish
+    restart: always
+    container_name: stockfish
+    networks:
+      exchess:
+        ipv4_address: 172.60.0.3
+    environment:
+      STOCKFISH_PORT: 9010
     ports:
       - "9010:9010"
 
@@ -17,14 +43,14 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_DB: <DB_NAME>
-      POSTGRES_USER: <DB_USER>
-      POSTGRES_PASSWORD: <DB_PASSWORD>
+      POSTGRES_DB: chess_dev
+      POSTGRES_USER: <CHANGE_ME>
+      POSTGRES_PASSWORD: <CHANGE_ME>
     ports:
       - 5430:5432
     networks:
       exchess:
-        ipv4_address: 172.60.0.3
+        ipv4_address: 172.60.0.4
     volumes:
       - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
 
@@ -34,21 +60,21 @@ services:
     build:
       context: .
       args:
-          - PUID=1000
-          - PGID=1000
+        - PUID=1000
+        - PGID=1000
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-       - pgadmin:/var/lib/pgadmin
-       - ./container:/tmp
+      - pgadmin:/var/lib/pgadmin
+      - ./container:/tmp
 
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
       exchess:
-        ipv4_address: 172.60.0.4
+        ipv4_address: 172.60.0.5
     restart: unless-stopped
 
 networks:
@@ -61,5 +87,5 @@ networks:
           gateway: 172.60.0.1
 
 volumes:
-    postgres:
-    pgadmin:
+  postgres:
+  pgadmin:

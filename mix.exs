@@ -49,7 +49,8 @@ defmodule Chess.MixProject do
       {:argon2_elixir, "~> 3.0"},
       {:comeonin, "~> 5.3"},
       {:cors_plug, "~> 3.0"},
-      {:binbo, "~> 4.0.2"}
+      {:binbo, "~> 4.0.2"},
+      {:bcrypt_elixir, "~> 3.0"}
     ]
   end
 

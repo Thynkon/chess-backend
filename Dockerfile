@@ -12,59 +12,36 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.14.2-erlang-25.1.2-debian-bullseye-20221004-slim
 #
+ARG ELIXIR_VERSION=1.14.2
+ARG OTP_VERSION=25.1.2
 ARG DEBIAN_VERSION=bullseye-20221004-slim
+ARG ALPINE_VERSION=alpine-3.16.2
 
-ARG BUILDER_IMAGE="debian:${DEBIAN_VERSION}"
-ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 
-FROM --platform=linux/amd64 ${BUILDER_IMAGE} as builder
+FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && \
-    apt-get install -y build-essential git wget g++ make curl && \
-    apt-get clean && \
-    rm -f /var/lib/apt/lists/*_*
+RUN apt-get update -y && apt-get install -y build-essential git curl vim bash watchman procps iproute2 lsof inotify-tools gcc make inetutils-ping nmap\
+    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+# install hex + rebar
+RUN mix local.hex --force && \
+    mix local.rebar --force
 
 # prepare build dir
-RUN mkdir -p /build
-WORKDIR /build/
+ENV APP_HOME /app
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
 
-# Download source code
-RUN wget 'https://github.com/official-stockfish/Stockfish/archive/refs/tags/sf_15.1.tar.gz' && \
-    tar -xf sf_15.1.tar.gz
+ENV DB_USER=
+ENV DB_PASSWORD=
+ENV DB_HOST=
+ENV DB_NAME=
+ENV DB_PORT=
 
-# Build stockfish
-RUN cd Stockfish-sf_15.1/src && \
-    make help && \
-    make net && \
-    make build ARCH=x86-64-modern
+ENV MIX_ENV="dev"
 
-# start a new build stage so that the final image will only contain
-# the compiled release and other runtime necessities
-FROM ${RUNNER_IMAGE}
-
-COPY ./entrypoint.sh /
-
-RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales socat ucspi-tcp netcat procps && \
-    apt-get clean && rm -f /var/lib/apt/lists/*_*
-
-# Set the locale
-RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
-
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
-WORKDIR /stockfish/
-# USER stockfish:stockfish
-
-COPY --chown=nobody:root --from=builder /build/Stockfish-sf_15.1/src/stockfish /stockfish/
-COPY --chown=nobody:root --from=builder /build/Stockfish-sf_15.1/Copying.txt /stockfish/
-# COPY --chown=nobody:root source.txt /stockfish/
-COPY --chown=nobody:root --from=builder /build/Stockfish-sf_15.1/src/*.nnue /stockfish/
-COPY entrypoint.sh /usr/local/bin/
-
-USER nobody
-
-EXPOSE 9010
-CMD ["socat", "TCP-LISTEN:9010,reuseaddr,fork", "EXEC:/stockfish/stockfish"]
+# Elixir remote session port
+EXPOSE 4369
+EXPOSE 4000

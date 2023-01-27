@@ -20,6 +20,12 @@ if System.get_env("PHX_SERVER") do
   config :chess, ChessWeb.Endpoint, server: true
 end
 
+config :chess, stockfish_host: to_charlist(System.get_env("STOCKFISH_HOST") || "localhost")
+
+{stockfish_port, _} = Integer.parse(System.get_env("STOCKFISH_PORT")) || {9010, ""}
+config :chess, stockfish_port: stockfish_port
+config :chess, stockfish_timeout: System.get_env("STOCKFISH_TIMEOUT") || 5000
+
 config :chess, Chess.Repo,
   username: System.get_env("DB_USER") || "chess",
   password: System.get_env("DB_PASSWORD") || "chesspw",

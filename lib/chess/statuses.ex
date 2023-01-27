@@ -39,9 +39,10 @@ defmodule Chess.Statuses do
 
   def get_status_by_slug(slug) do
     query =
-      from s in Status,
+      from(s in Status,
         where: s.slug == ^Atom.to_string(slug),
         select: s
+      )
 
     Repo.one(query)
   end
