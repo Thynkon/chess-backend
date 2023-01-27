@@ -32,6 +32,8 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
+**If you want to use the docker container you can skip the `Prerequisites` section and go to `Configuration`.**
+
 ### Prerequisites
 
 #### Erlang + Elixir 1.14.2 / OTP 25
@@ -82,21 +84,15 @@
 In order to launch the database server, you need to launch the Docker container. Rename `docker-compose.yml.example` to `docker-compose.yml` and set the follwing environment variables:
 
 ```yml
-environment:
-  POSTGRES_DB: <DB_NAME>
-  POSTGRES_USER: <DB_USER>
-  POSTGRES_PASSWORD: <DB_PASSWORD>
+app:
+  environment:
+    DB_USER: "<DB_USER>"
+    DB_PASSWORD: "<DB_PASSWORD>"
+db:
+  environment:
+    POSTGRES_USER: <DB_USER>
+    POSTGRES_PASSWORD: <DB_PASSWORD>
 ```
-
-Also, in order to connect to the database, you need to set some environment variables.
-
-| Variable    | Default value |
-|-------------|---------------|
-| DB_USER     | chess         |
-| DB_PASSWORD | chesspw       |
-| DB_NAME     | chess_dev     |
-| DB_HOST     | localhost     |
-| DB_PORT     | 5430          |
 
 ### Installation
 
@@ -147,6 +143,25 @@ In can either install Elixir's binaries directly on your machine or you can use 
    iex -S mix phx.server
    ```
 
+#### On the container
+
+1. Build `Phoenix` and `Stockfish` images
+
+   ```sh
+   docker-compose build
+   ```
+
+2. Run all containers
+
+   ```sh
+   docker-compose up -d
+   ```
+
+3. Check the logs
+
+   ```sh
+   docker-compose logs -f
+   ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Directory structure
