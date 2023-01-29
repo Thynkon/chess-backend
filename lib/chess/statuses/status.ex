@@ -5,11 +5,11 @@ defmodule Chess.Statuses.Status do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "statuses" do
-    field :name, :string
-    field :slug, :string
-
+    field(:name, :string)
+    field(:slug, Chess.Util.AtomType)
     timestamps()
-    has_many :games, Chess.Games.Game
+
+    has_many(:games, Chess.Games.Game)
   end
 
   @doc false

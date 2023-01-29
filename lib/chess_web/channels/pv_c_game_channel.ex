@@ -37,7 +37,11 @@ defmodule ChessWeb.PvCGameChannel do
     game = Chess.Games.get_game!(game_id)
     socket = socket |> assign(:game_id, game_id)
 
+    # Create game participation and set game status to 'on_going'
     game_participation = Chess.GameParticipations.get_game_participation_by_game(game.id)
+    game = Chess.Games.move_next_status_game(game)
+
+    Logger.debug("GOT GAME ==> #{inspect(game)}")
 
     {:ok, legal_moves} = fetch_legal_moves(pid)
     {:ok, fen} = :binbo.get_fen(pid)
@@ -84,6 +88,7 @@ defmodule ChessWeb.PvCGameChannel do
     Logger.debug("Got message from play_game, from => #{from}, to => #{to}")
     pid = socket.assigns.pid
     game_id = socket.assigns.game_id
+    game = Chess.Games.get_game!(game_id)
 
     # Play move and fetch UCI response
     # {:ok, :continue, "c7c5"} = :binbo.uci_play(pid, %{}, "#{from}#{to}")
@@ -108,6 +113,9 @@ defmodule ChessWeb.PvCGameChannel do
         matches = Regex.scan(~r/^([a-zA-Z]*)_wins$/, Atom.to_string(winner))
         Logger.debug("Winner ==> #{a}, Got matches ==> #{inspect(matches)}")
         winner = matches |> Enum.at(0) |> Enum.at(1)
+
+        # Moving game to 'finished'
+        game = Chess.Games.move_next_status_game(game)
 
         broadcast!(socket, "play_game", %{
           status: "checkmate",

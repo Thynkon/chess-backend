@@ -14,14 +14,14 @@ require Logger
 
 # Statuses
 statuses = [
-  %{name: "Scheduled", slug: "scheduled"},
-  %{name: "On going", slug: "on_going"},
-  %{name: "Finished", slug: "finished"},
-  %{name: "Archived", slug: "archived"}
+  %{name: "Scheduled", slug: :scheduled},
+  %{name: "On going", slug: :on_going},
+  %{name: "Finished", slug: :finished},
+  %{name: "Archived", slug: :archived}
 ]
 
 Enum.each(statuses, fn status ->
-  exists = Chess.Statuses.get_status_by_slug(String.to_atom(status[:slug]))
+  exists = Chess.Statuses.get_status_by_slug(status[:slug])
   Logger.debug("GOT STATUS ==> #{inspect(status)}")
 
   if exists === nil do

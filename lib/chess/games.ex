@@ -9,6 +9,7 @@ defmodule Chess.Games do
   alias Chess.Repo
 
   alias Chess.Games.Game
+  alias Chess.Statuses
 
   @doc """
   Returns the list of games.
@@ -21,6 +22,8 @@ defmodule Chess.Games do
   """
   def list_games do
     Repo.all(Game)
+    |> Repo.preload(:user)
+    |> Repo.preload(:status)
   end
 
   @doc """
@@ -37,7 +40,7 @@ defmodule Chess.Games do
       ** (Ecto.NoResultsError)
 
   """
-  def get_game!(id), do: Repo.get!(Game, id)
+  def get_game!(id), do: Repo.get!(Game, id) |> Repo.preload(:status)
 
   @doc """
   Creates a game.
@@ -82,6 +85,25 @@ defmodule Chess.Games do
     |> Repo.update()
   end
 
+  def move_next_status_game(%Game{} = game) do
+    Logger.debug("Current status to => #{inspect(game.status.slug)}")
+
+    next_status_slug = next_status(game)
+    next_status = Statuses.get_status_by_slug(next_status_slug)
+
+    Logger.debug("Setting status to => #{inspect(next_status.slug)}")
+    attrs = %{status_id: next_status.id}
+
+    game =
+      game
+      |> Game.start_changeset(attrs)
+      |> Repo.update!()
+      |> Repo.preload(:status, force: true)
+
+    Logger.debug("Updated game status ==> #{inspect(game.status.slug)}")
+    game
+  end
+
   @doc """
   Deletes a game.
 
@@ -109,5 +131,14 @@ defmodule Chess.Games do
   """
   def change_game(%Game{} = game, attrs \\ %{}) do
     Game.changeset(game, attrs)
+  end
+
+  defp next_status(%Game{} = game) do
+    case game.status.slug do
+      :scheduled -> :on_going
+      :on_going -> :finished
+      :finished -> :archived
+      :archived -> :archived
+    end
   end
 end

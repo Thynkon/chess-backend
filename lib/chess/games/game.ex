@@ -12,7 +12,7 @@ defmodule Chess.Games.Game do
 
     timestamps()
     belongs_to(:user, Chess.UserManager.User)
-    belongs_to(:status, Chess.Statuses.Status)
+    belongs_to(:status, Chess.Statuses.Status, on_replace: :update)
     belongs_to(:variant, Chess.Variants.Variant)
     belongs_to(:game_type, Chess.GameTypes.GameType)
     has_many(:game_participations, Chess.GameParticipations.GameParticipation)
@@ -32,6 +32,12 @@ defmodule Chess.Games.Game do
       :fields
     ])
     |> validate_required([:variant_id, :status_id, :game_type_id, :fields])
+  end
+
+  def start_changeset(game, attrs) do
+    game
+    |> cast(attrs, [:status_id])
+    |> validate_required([:status_id])
   end
 
   def finish_changeset(game, attrs) do
