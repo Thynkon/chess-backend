@@ -9,6 +9,9 @@ defmodule ChessWeb.EctoView do
   # end
   def translate_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, &translate_error/1)
+    |> Enum.map(fn {key, value} ->
+      "#{key |> Atom.to_string() |> String.capitalize()} #{value}"
+    end)
   end
 
   def render("changeset.json", %{changeset: %Ecto.Changeset{} = changeset, status: status}) do
